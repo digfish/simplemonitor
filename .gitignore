@@ -1,3 +1,6 @@
+*.db
+*.sqlite
+*.ini
 *.pyc
 _site
 build/*

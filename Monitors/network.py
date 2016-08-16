@@ -205,6 +205,8 @@ class MonitorHost(Monitor):
     ping_regexp = ""
     type = "host"
     time_regexp = ""
+    pingtime = -0.1
+    max_latency = 0.0
 
     def __init__(self, name, config_options):
         """
@@ -219,6 +221,8 @@ class MonitorHost(Monitor):
             ping_ttl = "5"
         ping_ms = ping_ttl * 1000
         platform = sys.platform
+        self.max_latency = float(config_options['max_latency'])
+
         if platform in ['win32', 'cygwin']:
             self.ping_command = "ping -n 1 -w " + ping_ms + " %s"
             self.ping_regexp = "Reply from "
@@ -230,9 +234,11 @@ class MonitorHost(Monitor):
         elif platform.startswith('linux'):
             self.ping_command = "ping -c1 -W" + ping_ttl + " %s 2> /dev/null"
             self.ping_regexp = "bytes from"
-            self.time_regexp = "min/avg/max/stddev = [\d.]+/(?P<ms>[\d.]+)/"
-        else:
+            self.time_regexp = "min/avg/max/.+?dev = [\d.]+/(?P<ms>[\d.]+)"
+        else: # rtt min/avg/max/mdev = 27.034/27.034/27.034/0.000 ms
             RuntimeError("Don't know how to run ping on this platform, help!")
+
+        print "Max latency configured is %f" % self.max_latency
 
         try:
             host = config_options["host"]
@@ -242,6 +248,7 @@ class MonitorHost(Monitor):
             raise RuntimeError("missing hostname")
         self.host = host
 
+
     def run_test(self):
         r = re.compile(self.ping_regexp)
         r2 = re.compile(self.time_regexp)
@@ -249,29 +256,39 @@ class MonitorHost(Monitor):
         pingtime = 0.0
         try:
             process_handle = os.popen(self.ping_command % self.host)
+
             for line in process_handle:
                 matches = r.search(line)
+
                 if matches:
                     success = True
-                else:
-                    matches = r2.search(line)
-                    if matches:
-                        pingtime = matches.group("ms")
+
+                matches_pingtime = r2.search(line)
+
+                if matches_pingtime:
+                    pingtime = float(matches_pingtime.group("ms"))
+                    self.pingtime = float( pingtime )
+                    success = True
+
         except Exception, e:
-            self.record_fail(e)
-            pass
+                self.record_fail(e)
+                pass
+
         if success:
-            if pingtime > 0:
-                self.record_success("%sms" % pingtime)
+            print "Pingtime: %f" % pingtime
+            if pingtime < self.max_latency:
+                self.record_success("%s ms" % pingtime)
+                return True
             else:
-                self.record_success()
-            return True
+                self.record_fail("latency exceeded by %f ms" % (pingtime - self.max_latency))
+                return False
+
         self.record_fail()
         return False
 
     def describe(self):
         """Explains what this instance is checking"""
-        return "checking host %s is pingable" % self.host
+        return "checking host %s is pingable (%f)" % (self.host,self.pingtime)
 
     def get_params(self):
         return (self.host, )

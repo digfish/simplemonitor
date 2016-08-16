@@ -2,5 +2,7 @@
 *.sqlite
 *.ini
 *.pyc
+*.log
 _site
 build/*
+/monitor-venv/

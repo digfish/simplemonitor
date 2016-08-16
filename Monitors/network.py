@@ -230,11 +230,11 @@ class MonitorHost(Monitor):
         elif platform.startswith('freebsd') or platform.startswith('darwin'):
             self.ping_command = "ping -c1 -t" + ping_ttl + " %s 2> /dev/null"
             self.ping_regexp = "bytes from"
-            self.time_regexp = "min/avg/max/stddev = [\d.]+/(?P<ms>[\d.]+)/"
+            self.time_regexp = "min/avg/max(/mdev)? = [\d.]+/(?P<ms>[\d.]+)"
         elif platform.startswith('linux'):
             self.ping_command = "ping -c1 -W" + ping_ttl + " %s 2> /dev/null"
             self.ping_regexp = "bytes from"
-            self.time_regexp = "min/avg/max = [\d.]+/(?P<ms>[\d.]+)"
+            self.time_regexp = "min/avg/max(/\D+)? = [\d.]+/(?P<ms>[\d.]+)"
         else: # rtt min/avg/max/mdev = 27.034/27.034/27.034/0.000 ms
             RuntimeError("Don't know how to run ping on this platform, help!")
 

@@ -32,6 +32,7 @@ import Alerters.syslogger
 import Alerters.execute
 import Alerters.slack
 import Alerters.http
+import Alerters.push_bullet
 
 VERSION = "1.7"
 
@@ -237,6 +238,8 @@ def load_alerters(m, config, quiet):
             a = Alerters.slack.SlackAlerter(config_options)
         elif type == "http":
             a = Alerters.http.HttpAlerter(config_options)
+        elif type == "pushbullet":
+            a = Alerters.push_bullet.PushBulletAlerter(config_options)
         else:
             sys.stderr.write("Unknown alerter type %s\n" % type)
             continue
@@ -407,3 +410,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -27,4 +27,6 @@ class PushBulletAlerter(Alerter):
         if type != "failure":
             return
 
+        print "Sending pushbullet message "
+
         push = self.pb.push_note( name + " on " + monitor.running_on, monitor.get_result() )

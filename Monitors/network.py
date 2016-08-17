@@ -9,6 +9,8 @@ import sys
 import socket
 import datetime
 import subprocess
+import pickle
+
 
 from monitor import Monitor
 
@@ -206,7 +208,7 @@ class MonitorHost(Monitor):
     type = "host"
     time_regexp = ""
     pingtime = -0.1
-    max_latency = 0.0
+    max_latency = 10000
 
     def __init__(self, name, config_options):
         """
@@ -235,7 +237,7 @@ class MonitorHost(Monitor):
             self.ping_command = "ping -c1 -W" + ping_ttl + " %s 2> /dev/null"
             self.ping_regexp = "bytes from"
             self.time_regexp = "min/avg/max(/\D+)? = [\d.]+/(?P<ms>[\d.]+)"
-        else: # rtt min/avg/max/mdev = 27.034/27.034/27.034/0.000 ms
+        else:
             RuntimeError("Don't know how to run ping on this platform, help!")
 
         print "Max latency configured is %f" % self.max_latency
@@ -283,7 +285,7 @@ class MonitorHost(Monitor):
                 self.record_fail("latency exceeded by %f ms" % (pingtime - self.max_latency))
                 return False
 
-        self.record_fail()
+        self.record_fail("not answered")
         return False
 
     def describe(self):
@@ -370,3 +372,58 @@ class MonitorDNS(Monitor):
 
     def get_params(self):
         return (self.path, )
+
+
+class MonitorIPAddress(Monitor):
+    """ Monitor IP Address which is obtained through some HTTP service """
+
+
+    type = 'monitor_ip_address'
+    __ip_store_filename = 'ip.p'
+    ip_getter_url = ''
+    ip_address = ''
+
+    def __init__(self, name, config_options):
+        Monitor.__init__(self, name, config_options)
+        try:
+            self.ip_getter_url = config_options['ip_getter_url']
+        except:
+            raise RuntimeError("missing value for ip_getter_url")
+        if self.ip_getter_url == '':
+            raise RuntimeError("ip_getter_url is empty!")
+
+    def store_ip_address(self,ip_address):
+        pickle.dump(ip_address,open(self.__ip_store_filename,"wb"))
+
+    def last_ip_address(self):
+        try:
+            return pickle.load(open(self.__ip_store_filename,"rb"))
+        except Exception, e:
+            print "monitor " +  self.name + ":" ,  "Couldn't get last IP address"
+            return ""
+
+    def run_test(self):
+        try:
+            self.ip_address = urllib2.urlopen(self.ip_getter_url).read().strip()
+            self.record_success("The IP address is %s" % self.ip_address)
+            last_ip_address = self.last_ip_address()
+            if last_ip_address != self.ip_address :
+                self.record_fail("The IP address changed. The news is %s" % self.ip_address)
+                self.store_ip_address(self.ip_address)
+                return False
+            else:
+                print "monitor " +  self.name + ":" , "The IP address is %s " % self.ip_address
+                self.record_success("The IP address hadn't changed!")
+                return True
+        except Exception, e:
+            self.record_fail("Couldn't get IP address: %s" % e)
+            return False
+
+
+    def describe(self):
+        return "The IP Address is %s" % (self.ip_address)
+
+    def get_params(self):
+        return (self.ip_address, )
+
+

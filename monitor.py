@@ -164,6 +164,9 @@ def load_monitors(m, filename, quiet):
         elif type == 'command':
             new_monitor = Monitors.host.MonitorCommand(monitor, config_options)
 
+        elif type == 'monitor_ip_address':
+            new_monitor = Monitors.network.MonitorIPAddress(monitor, config_options)
+
         else:
             sys.stderr.write("Unknown type %s for monitor %s\n" % (type, monitor))
             continue

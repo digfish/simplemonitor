@@ -13,6 +13,7 @@ import pickle
 
 
 from monitor import Monitor
+from random import randint
 
 
 # coded by Kalys Osmonov
@@ -375,8 +376,7 @@ class MonitorDNS(Monitor):
 
 
 class MonitorIPAddress(Monitor):
-    """ Monitor IP Address which is obtained through some HTTP service """
-
+    """ Monitor own IP Address which is caught through some external HTTP service """
 
     type = 'monitor_ip_address'
     __ip_store_filename = 'ip.p'
@@ -402,13 +402,15 @@ class MonitorIPAddress(Monitor):
             print "monitor " +  self.name + ":" ,  "Couldn't get last IP address"
             return ""
 
+
     def run_test(self):
         try:
             self.ip_address = urllib2.urlopen(self.ip_getter_url).read().strip()
+#           self.ip_address = "%d.%d.%d.%d" % ( randint(0,255) , randint(0,255) ,randint(0,255) , randint(0,255))
             self.record_success("The IP address is %s" % self.ip_address)
             last_ip_address = self.last_ip_address()
             if last_ip_address != self.ip_address :
-                self.record_fail("The IP address changed. The news is %s" % self.ip_address)
+                self.record_fail("Simplemonitor: The public IP address has changed. The new one is %s" % self.ip_address)
                 self.store_ip_address(self.ip_address)
                 return False
             else:

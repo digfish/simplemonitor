@@ -395,7 +395,7 @@ class MonitorIPAddress(Monitor):
     def store_ip_address(self,ip_address):
         pickle.dump(ip_address,open(self.__ip_store_filename,"wb"))
 
-    def last_ip_address(self):
+    def _last_ip_address(self):
         try:
             return pickle.load(open(self.__ip_store_filename,"rb"))
         except Exception, e:
@@ -406,15 +406,15 @@ class MonitorIPAddress(Monitor):
     def run_test(self):
         try:
             self.ip_address = urllib2.urlopen(self.ip_getter_url).read().strip()
-#           self.ip_address = "%d.%d.%d.%d" % ( randint(0,255) , randint(0,255) ,randint(0,255) , randint(0,255))
-            self.record_success("The IP address is %s" % self.ip_address)
-            last_ip_address = self.last_ip_address()
+#            self.ip_address = "%d.%d.%d.%d" % ( randint(0,255) , randint(0,255) ,randint(0,255) , randint(0,255))
+#            print("The IP address informed is %s" % self.ip_address)
+            last_ip_address = self._last_ip_address()
             if last_ip_address != self.ip_address :
-                self.record_fail("Simplemonitor: The public IP address has changed. The new one is %s" % self.ip_address)
+                self.record_fail("The public IP address has changed. The new one is %s" % self.ip_address)
                 self.store_ip_address(self.ip_address)
                 return False
             else:
-                print "monitor " +  self.name + ":" , "The IP address is %s " % self.ip_address
+#                print "monitor " +  self.name + ": The IP address is %s " % self.ip_address
                 self.record_success("The IP address hadn't changed!")
                 return True
         except Exception, e:

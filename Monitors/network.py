@@ -407,8 +407,6 @@ class MonitorIPAddress(Monitor):
         try:
             # get the address from an external HTTP service
             self.ip_address = urllib2.urlopen(self.ip_getter_url).read().strip()
-#            self.ip_address = "%d.%d.%d.%d" % ( randint(0,255) , randint(0,255) ,randint(0,255) , randint(0,255))
-#            print("The IP address informed is %s" % self.ip_address)
             last_ip_address = self._last_ip_address()
             if last_ip_address != self.ip_address :
                 self.record_fail("The public IP address has changed. The new one is %s" % self.ip_address)

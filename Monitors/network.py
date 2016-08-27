@@ -405,6 +405,7 @@ class MonitorIPAddress(Monitor):
 
     def run_test(self):
         try:
+            # get the address from an external HTTP service
             self.ip_address = urllib2.urlopen(self.ip_getter_url).read().strip()
 #            self.ip_address = "%d.%d.%d.%d" % ( randint(0,255) , randint(0,255) ,randint(0,255) , randint(0,255))
 #            print("The IP address informed is %s" % self.ip_address)

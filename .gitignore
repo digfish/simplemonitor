@@ -7,3 +7,6 @@ _site
 build/*
 /monitor-venv/
 /ip.p
+/.pipimport-ignore
+/.project
+/.pydevproject

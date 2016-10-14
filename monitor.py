@@ -264,7 +264,7 @@ def main():
     parser.add_option("-p", "--pidfile", dest="pidfile", default="", help="Write PID into this file")
     parser.add_option("-N", "--no-network", dest="no_network", default=False, action="store_true", help="Disable network listening socket")
     parser.add_option("-d", "--debug", dest="debug", default=False, action="store_true", help="Enable debug output")
-    parser.add_option("-f", "--config", dest="config", default="monitor.ini", help="configuration file")
+    parser.add_option("-f", "--config", dest="config", default="alerters.ini", help="configuration file")
 
     (options, args) = parser.parse_args()
 

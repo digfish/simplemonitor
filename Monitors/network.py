@@ -283,7 +283,8 @@ class MonitorHost(Monitor):
                 self.record_success("%s ms" % pingtime)
                 return True
             else:
-                self.record_fail("latency exceeded by %f ms" % (pingtime - self.max_latency))
+                delay = pingtime - self.max_latency
+                self.record_fail("latency exceeded by %f ms (limit is %d ms)" % ( delay  , int(self.max_latency) ) )
                 return False
 
         self.record_fail("not answered")

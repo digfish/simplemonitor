@@ -25,7 +25,7 @@ class FileLogger(Logger):
         if "filename" in config_options:
             try:
                 self.filename = config_options["filename"]
-                self.file_handle = open(self.filename, "w+")
+                self.file_handle = open(self.filename, "a")
             except Exception, e:
                 raise RuntimeError("Couldn't open log file %s for appending: %s" % (self.filename, e))
         else:
@@ -45,9 +45,9 @@ class FileLogger(Logger):
 
         try:
             if monitor.virtual_fail_count() > 0:
-                self.file_handle.write("%d %s: failed since %s; VFC=%d (%s)" % (int(time.time()), name, monitor.first_failure_time().isoformat(), monitor.virtual_fail_count(), monitor.get_result()))
+                self.file_handle.write("%d - %s- %s: failed since %s; VFC=%d (%s)" % (int(time.time()), time.asctime(), name, monitor.first_failure_time().isoformat(), monitor.virtual_fail_count(), monitor.get_result()))
             else:
-                self.file_handle.write("%d %s: ok" % (int(time.time()), name))
+                self.file_handle.write("%d - %s - %s: ok" % (int(time.time()), time.asctime(), name))
             self.file_handle.write("\n")
 
             if not self.buffered:

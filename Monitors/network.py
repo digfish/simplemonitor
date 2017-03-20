@@ -278,7 +278,7 @@ class MonitorHost(Monitor):
                 pass
 
         if success:
-            print "Ping %s time: %f" % (self.host, pingtime)
+            print "[%s] Ping %s: %f" % (self.name, self.host, pingtime)
             if pingtime < self.max_latency:
                 self.record_success("%s ms" % pingtime)
                 return True

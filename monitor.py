@@ -36,6 +36,9 @@ import Alerters.push_bullet
 
 VERSION = "1.7"
 
+def now():
+    from time import gmtime, strftime
+    return strftime("%H:%M:%S", gmtime())
 
 def get_list(config, section, key, want_ints=False):
     """Get a list of items back from a command-separated list."""
@@ -375,6 +378,7 @@ def main():
 
             if not options.quiet and not options.verbose:
                 heartbeat += 1
+                sys.stdout.write(now())
                 if heartbeat == 2:
                     sys.stdout.write(".")
                     sys.stdout.flush()
